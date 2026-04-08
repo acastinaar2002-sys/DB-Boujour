@@ -1,10 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Bot, User, Sparkles, RotateCcw, Volume2, MessageSquare, X } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RotateCcw, Volume2, MessageSquare, X, AlertTriangle } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 import { cn } from '../lib/utils';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+const getAI = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error("GEMINI_API_KEY is not configured in environment variables.");
+  }
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey: key });
+  }
+  return aiInstance;
+};
 
 interface Message {
   role: 'user' | 'model';
@@ -19,7 +30,14 @@ export default function AITutorChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'conversation' | 'coaching' | 'exam'>('conversation');
+  const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!process.env.GEMINI_API_KEY) {
+      setApiKeyMissing(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -53,6 +71,7 @@ export default function AITutorChat() {
         Explanation: "In French, 'à + le' becomes 'au'."
       `;
 
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
@@ -127,8 +146,19 @@ export default function AITutorChat() {
       {/* Messages */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30"
+        className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 relative"
       >
+        {apiKeyMissing && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-white/80 backdrop-blur-sm">
+            <div className="bg-red-50 border border-red-100 p-6 rounded-3xl text-center max-w-xs shadow-xl">
+              <AlertTriangle className="w-12 h-12 text-fr-red mx-auto mb-4" />
+              <h4 className="font-bold text-fr-red mb-2">API Key Missing</h4>
+              <p className="text-xs text-red-700 leading-relaxed">
+                The Gemini API Key is not configured. Please add <code className="bg-red-100 px-1 rounded">GEMINI_API_KEY</code> to your Vercel Environment Variables to enable the AI Tutor.
+              </p>
+            </div>
+          </div>
+        )}
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
             <motion.div
