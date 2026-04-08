@@ -39,10 +39,19 @@ import {
   ChevronRight,
   Zap,
   BrainCircuit,
-  Target
+  Target,
+  Sparkles,
+  MessageSquare,
+  Play,
+  Trophy,
+  Lightbulb,
+  GraduationCap,
+  X
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import AITutorChat from './AITutorChat';
+import LearningFlow from './LearningFlow';
 
 // Mock Data
 const userEvolution = [
@@ -73,12 +82,46 @@ const financialData = [
 ];
 
 const pronunciationErrors = [
-  { phoneme: 'R', errors: 85 },
-  { phoneme: 'U', errors: 65 },
-  { phoneme: 'EU', errors: 55 },
-  { phoneme: 'ON', errors: 40 },
-  { phoneme: 'AN', errors: 30 },
-  { phoneme: 'E', errors: 15 },
+  { phoneme: 'ʁ', errors: 85, example: 'Paris, Rouge', audio: '#' },
+  { phoneme: 'y', errors: 65, example: 'Tu, Vue', audio: '#' },
+  { phoneme: 'ø', errors: 55, example: 'Bleu, Deux', audio: '#' },
+  { phoneme: 'ɔ̃', errors: 40, example: 'Bon, Maison', audio: '#' },
+  { phoneme: 'ɑ̃', errors: 30, example: 'Enfant, Temps', audio: '#' },
+  { phoneme: 'ə', errors: 15, example: 'Le, Petit', audio: '#' },
+];
+
+const recommendations = [
+  { 
+    title: "Mastering Nasal Vowels", 
+    difficulty: "Intermediate", 
+    reason: "Based on your recent errors with /ɔ̃/ and /ɑ̃/",
+    type: "Pronunciation"
+  },
+  { 
+    title: "At the Boulangerie", 
+    difficulty: "Beginner", 
+    reason: "Recommended for real-world dialogue practice",
+    type: "Conversation"
+  },
+  { 
+    title: "Subjunctive Mood Basics", 
+    difficulty: "Advanced", 
+    reason: "You've mastered 90% of indicative tenses",
+    type: "Grammar"
+  }
+];
+
+const culturalQuizzes = [
+  { title: "French Etiquette", xp: 150, level: "Mastery 1" },
+  { title: "Regions of France", xp: 200, level: "Explorer" },
+  { title: "History of the Louvre", xp: 300, level: "Historian" }
+];
+
+const churnBreakdown = [
+  { reason: "Intermediate Plateau", impact: "45%", color: "bg-fr-red", description: "Users dropping off after Level 2" },
+  { reason: "Payment Failures", impact: "25%", color: "bg-amber-500", description: "Expired cards or failed renewals" },
+  { reason: "Course Difficulty", impact: "20%", color: "bg-fr-blue", description: "Advanced grammar complexity" },
+  { reason: "Other", impact: "10%", color: "bg-slate-400", description: "App inactivity or manual cancellations" },
 ];
 
 const modelPerformance = [
@@ -130,6 +173,8 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, color = 'blue', d
 );
 
 export default function Dashboard() {
+  const [selectedPhoneme, setSelectedPhoneme] = React.useState<any>(null);
+
   return (
     <div className="space-y-8 p-8 bg-slate-50/50 min-h-screen">
       {/* Header Section */}
@@ -141,113 +186,158 @@ export default function Dashboard() {
           <h1 className="text-3xl font-black text-fr-blue tracking-tight flex items-center gap-2">
             Tableau de Bord <span className="text-slate-400 font-light">|</span> Bonjour!Français
           </h1>
-          <p className="text-slate-600 mt-1 font-medium">Profitability analysis and French brand identity.</p>
+          <p className="text-slate-600 mt-1 font-medium">Intelligent Learning Companion & Analytics</p>
         </motion.div>
         
-        {/* Churn Alert */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-4 bg-red-50 border border-red-100 p-4 rounded-2xl animate-pulse shadow-lg shadow-red-100/50"
-        >
-          <AlertTriangle className="w-6 h-6 text-fr-red" />
-          <div>
-            <p className="text-fr-red font-bold text-sm">CHURN ALERT</p>
-            <p className="text-red-700 text-xs">Churn rate exceeded 15% in Intermediate level.</p>
-          </div>
-        </motion.div>
+        <div className="flex items-center gap-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-4 bg-blue-50 border border-blue-100 p-4 rounded-2xl shadow-lg shadow-blue-100/50"
+          >
+            <Sparkles className="w-6 h-6 text-fr-blue" />
+            <div>
+              <p className="text-fr-blue font-bold text-sm">AI STATUS</p>
+              <p className="text-blue-700 text-xs">Tutor is ready for conversation.</p>
+            </div>
+          </motion.div>
+
+          {/* Churn Alert */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-4 bg-red-50 border border-red-100 p-4 rounded-2xl animate-pulse shadow-lg shadow-red-100/50"
+          >
+            <AlertTriangle className="w-6 h-6 text-fr-red" />
+            <div>
+              <p className="text-fr-red font-bold text-sm">CHURN ALERT</p>
+              <p className="text-red-700 text-xs">Churn rate exceeded 15% in Intermediate level.</p>
+            </div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* Section: Users and Adoption */}
+      {/* Main Grid: AI Tutor & Key Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MetricCard title="DAU / MAU" value="24.5%" change="+2.1%" icon={Users} trend="up" color="blue" delay={0.1} />
+            <MetricCard title="Learning Flow" value="88% Velocity" change="+5.4%" icon={Zap} trend="up" color="blue" delay={0.2} />
+          </div>
+          <AITutorChat />
+        </div>
+        <div className="space-y-8">
+          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-amber-50 rounded-xl">
+                <Lightbulb className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Adaptive Recommendations</h3>
+            </div>
+            <div className="space-y-4">
+              {recommendations.map((rec, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-fr-blue transition-colors cursor-pointer"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-bold text-fr-blue uppercase tracking-widest">{rec.type}</span>
+                    <span className="text-[10px] font-bold text-slate-400">{rec.difficulty}</span>
+                  </div>
+                  <h4 className="font-bold text-slate-800 group-hover:text-fr-blue transition-colors">{rec.title}</h4>
+                  <p className="text-[10px] text-slate-500 mt-1">{rec.reason}</p>
+                  <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-fr-blue opacity-0 group-hover:opacity-100 transition-opacity">
+                    Start Lesson <ChevronRight className="w-3 h-3" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-fr-blue p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+              <Trophy className="w-32 h-32" />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-xl font-bold mb-2">Cultural Mastery</h3>
+              <p className="text-blue-100 text-sm mb-6">Master the language through its culture.</p>
+              <div className="space-y-4">
+                {culturalQuizzes.map((quiz, i) => (
+                  <div key={i} className="flex items-center justify-between bg-white/10 p-3 rounded-2xl backdrop-blur-sm border border-white/10">
+                    <div>
+                      <p className="text-sm font-bold">{quiz.title}</p>
+                      <p className="text-[10px] text-blue-200">{quiz.level}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-black">+{quiz.xp} XP</p>
+                      <button className="text-[10px] font-bold underline mt-1">Take Quiz</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section: Learning Flow View */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-fr-blue flex items-center gap-2">
-            <Users className="w-5 h-5" /> Users and Adoption
+            <GraduationCap className="w-5 h-5" /> Learning Flow View
           </h2>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Real-time Data</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard title="DAU / MAU" value="24.5%" change="+2.1%" icon={Users} trend="up" color="blue" delay={0.1} />
-          <MetricCard title="LTV (Life Time Value)" value="$142.50" change="+5.4%" icon={DollarSign} trend="up" color="blue" delay={0.2} />
-          <MetricCard title="CAC (Acquisition Cost)" value="$28.10" change="-1.2%" icon={Activity} trend="up" color="blue" delay={0.3} />
-          <MetricCard title="Conversion Rate" value="12.4%" change="+0.8%" icon={TrendingUp} trend="up" color="blue" delay={0.4} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
-          >
-            <h3 className="text-lg font-bold text-fr-blue mb-6">User Evolution and Predictions</h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={userEvolution}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                    cursor={{ stroke: '#0055A4', strokeWidth: 2 }}
-                  />
-                  <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '20px' }} />
-                  <Area type="monotone" dataKey="users" name="Real Users" fill="#0055A4" fillOpacity={0.1} stroke="#0055A4" strokeWidth={3} />
-                  <Line type="monotone" dataKey="prediction" name="Growth Prediction" stroke="#3377B6" strokeDasharray="5 5" strokeWidth={2} dot={false} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
-          >
-            <h3 className="text-lg font-bold text-fr-blue mb-6">Conversion Funnel</h3>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={funnelData} layout="vertical" margin={{ left: 20 }}>
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} width={80} />
-                  <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={40}>
-                    {funnelData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        </div>
+        <LearningFlow />
       </div>
 
       {/* Section: Learning and AI Performance */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-fr-blue flex items-center gap-2">
-          <BrainCircuit className="w-5 h-5" /> Learning and AI Performance
+          <BrainCircuit className="w-5 h-5" /> Advanced Pronunciation Analytics
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Heatmap simulated with Bar Chart */}
+          {/* Enhanced Heatmap */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2"
+            className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm lg:col-span-2"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-fr-blue">Heatmap: Pronunciation Errors</h3>
+              <div>
+                <h3 className="text-lg font-bold text-fr-blue">Phoneme Error Heatmap</h3>
+                <p className="text-xs text-slate-400">Click a phoneme for corrective resources</p>
+              </div>
               <Mic className="w-5 h-5 text-slate-400" />
             </div>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={pronunciationErrors}>
+                <BarChart 
+                  data={pronunciationErrors}
+                  onClick={(data: any) => data && data.activePayload && setSelectedPhoneme(data.activePayload[0].payload)}
+                >
                   <XAxis dataKey="phoneme" axisLine={false} tickLine={false} />
                   <YAxis hide />
-                  <Tooltip />
-                  <Bar dataKey="errors" radius={[10, 10, 0, 0]}>
+                  <Tooltip 
+                    cursor={{ fill: 'transparent' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-4 rounded-2xl shadow-xl border border-slate-100">
+                            <p className="text-sm font-bold text-fr-blue">Phoneme: /{data.phoneme}/</p>
+                            <p className="text-xs text-slate-500 mt-1">Error Frequency: {data.errors}%</p>
+                            <p className="text-[10px] text-slate-400 italic mt-2">Click to hear examples</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar dataKey="errors" radius={[10, 10, 0, 0]} className="cursor-pointer">
                     {pronunciationErrors.map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`} 
@@ -258,23 +348,42 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex justify-center gap-8 mt-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <div className="w-3 h-3 bg-fr-blue rounded-full" /> Low Error
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <div className="w-3 h-3 bg-fr-red rounded-full" /> High Error
-              </div>
-            </div>
+            
+            <AnimatePresence>
+              {selectedPhoneme && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 relative"
+                >
+                  <button 
+                    onClick={() => setSelectedPhoneme(null)}
+                    className="absolute top-2 right-2 p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X className="w-3 h-3 text-slate-400" />
+                  </button>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900">Corrective Resource: /{selectedPhoneme.phoneme}/</h4>
+                      <p className="text-xs text-slate-500 mt-1">Common examples: <span className="font-bold text-fr-blue">{selectedPhoneme.example}</span></p>
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-fr-blue text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-colors">
+                      <Play className="w-3 h-3 fill-current" /> Listen to Native
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+            className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"
           >
-            <h3 className="text-lg font-bold text-fr-blue mb-6">Model Metrics</h3>
+            <h3 className="text-lg font-bold text-fr-blue mb-6">AI Model Robustness</h3>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={modelPerformance}>
@@ -306,7 +415,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+            className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"
           >
             <h3 className="text-lg font-bold text-fr-blue mb-6">Revenue vs Monthly Costs</h3>
             <div className="h-[300px] w-full">
@@ -329,9 +438,46 @@ export default function Dashboard() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.0 }}
-              className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+              className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative group"
             >
-              <h3 className="text-sm font-bold text-slate-400 uppercase mb-2">Profitability Margin</h3>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-sm font-bold text-slate-400 uppercase">Profitability Margin</h3>
+                <div className="relative">
+                  <button className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-fr-blue">
+                    <Info className="w-4 h-4" />
+                  </button>
+                  
+                  {/* Churn Breakdown Tooltip */}
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <h4 className="text-xs font-black text-fr-blue uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-3 h-3 text-fr-red" /> Churn Breakdown
+                    </h4>
+                    <div className="space-y-3">
+                      {churnBreakdown.map((item, idx) => (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex justify-between text-[10px] font-bold">
+                            <span className="text-slate-600">{item.reason}</span>
+                            <span className="text-fr-blue">{item.impact}</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              whileInView={{ width: item.impact }}
+                              className={cn("h-full rounded-full", item.color)}
+                            />
+                          </div>
+                          <p className="text-[8px] text-slate-400 leading-tight">{item.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-50">
+                      <p className="text-[9px] text-slate-500 italic">
+                        * Referencing data from the <span className="font-bold text-fr-blue">Learning Flow View</span> below.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-black text-fr-red">18.4%</span>
                 <span className="text-fr-red font-bold text-sm mb-1 flex items-center">
@@ -346,7 +492,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.1 }}
-              className="bg-fr-blue p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group"
+              className="bg-fr-blue p-6 rounded-3xl text-white shadow-lg relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Globe className="w-24 h-24" />
