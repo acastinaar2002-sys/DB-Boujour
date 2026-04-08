@@ -15,7 +15,12 @@ import {
   Cell,
   AreaChart,
   Area,
-  ComposedChart
+  ComposedChart,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
 } from 'recharts';
 import { 
   TrendingUp, 
@@ -31,8 +36,12 @@ import {
   Star,
   AlertTriangle,
   Info,
-  ChevronRight
+  ChevronRight,
+  Zap,
+  BrainCircuit,
+  Target
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 
 // Mock Data
@@ -72,22 +81,30 @@ const pronunciationErrors = [
   { phoneme: 'E', errors: 15 },
 ];
 
-const levelDistribution = [
-  { name: 'Beginner', count: 5500, color: '#0055A4' },
-  { name: 'Intermediate', count: 3200, color: '#FFFFFF' },
-  { name: 'Advanced', count: 1300, color: '#EF4135' },
+const modelPerformance = [
+  { subject: 'Accuracy', A: 92, fullMark: 100 },
+  { subject: 'Precision', A: 88, fullMark: 100 },
+  { subject: 'Recall', A: 85, fullMark: 100 },
+  { subject: 'F1 Score', A: 86, fullMark: 100 },
+  { subject: 'Latency', A: 95, fullMark: 100 },
+  { subject: 'Robustness', A: 82, fullMark: 100 },
 ];
 
-const MetricCard = ({ title, value, change, icon: Icon, trend, color = 'blue' }: any) => (
-  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+const MetricCard = ({ title, value, change, icon: Icon, trend, color = 'blue', delay = 0 }: any) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+    className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+  >
     <div className={cn(
-      "absolute top-0 left-0 w-1 h-full",
+      "absolute top-0 left-0 w-1 h-full transition-all duration-300 group-hover:w-2",
       color === 'blue' ? "bg-fr-blue" : "bg-fr-red"
     )} />
     <div className="flex justify-between items-start mb-4">
       <div className={cn(
-        "p-2 rounded-lg",
-        color === 'blue' ? "bg-blue-50" : "bg-red-50"
+        "p-2 rounded-lg transition-colors",
+        color === 'blue' ? "bg-blue-50 group-hover:bg-blue-100" : "bg-red-50 group-hover:bg-red-100"
       )}>
         <Icon className={cn(
           "w-6 h-6",
@@ -109,7 +126,7 @@ const MetricCard = ({ title, value, change, icon: Icon, trend, color = 'blue' }:
       "text-2xl font-black mt-1",
       color === 'blue' ? "text-fr-blue" : "text-fr-red"
     )}>{value}</p>
-  </div>
+  </motion.div>
 );
 
 export default function Dashboard() {
@@ -117,37 +134,52 @@ export default function Dashboard() {
     <div className="space-y-8 p-8 bg-slate-50/50 min-h-screen">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
           <h1 className="text-3xl font-black text-fr-blue tracking-tight flex items-center gap-2">
-            Dashboard <span className="text-slate-400 font-light">|</span> Bonjour!Français
+            Tableau de Bord <span className="text-slate-400 font-light">|</span> Bonjour!Français
           </h1>
           <p className="text-slate-600 mt-1 font-medium">Profitability analysis and French brand identity.</p>
-        </div>
+        </motion.div>
         
         {/* Churn Alert */}
-        <div className="flex items-center gap-4 bg-red-50 border border-red-100 p-4 rounded-2xl animate-pulse">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-4 bg-red-50 border border-red-100 p-4 rounded-2xl animate-pulse shadow-lg shadow-red-100/50"
+        >
           <AlertTriangle className="w-6 h-6 text-fr-red" />
           <div>
             <p className="text-fr-red font-bold text-sm">CHURN ALERT</p>
             <p className="text-red-700 text-xs">Churn rate exceeded 15% in Intermediate level.</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Section: Users and Adoption */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold text-fr-blue flex items-center gap-2">
-          <Users className="w-5 h-5" /> Users and Adoption
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-fr-blue flex items-center gap-2">
+            <Users className="w-5 h-5" /> Users and Adoption
+          </h2>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Real-time Data</span>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard title="DAU / MAU" value="24.5%" change="+2.1%" icon={Users} trend="up" color="blue" />
-          <MetricCard title="LTV (Life Time Value)" value="$142.50" change="+5.4%" icon={DollarSign} trend="up" color="blue" />
-          <MetricCard title="CAC (Acquisition Cost)" value="$28.10" change="-1.2%" icon={Activity} trend="up" color="blue" />
-          <MetricCard title="Conversion Rate" value="12.4%" change="+0.8%" icon={TrendingUp} trend="up" color="blue" />
+          <MetricCard title="DAU / MAU" value="24.5%" change="+2.1%" icon={Users} trend="up" color="blue" delay={0.1} />
+          <MetricCard title="LTV (Life Time Value)" value="$142.50" change="+5.4%" icon={DollarSign} trend="up" color="blue" delay={0.2} />
+          <MetricCard title="CAC (Acquisition Cost)" value="$28.10" change="-1.2%" icon={Activity} trend="up" color="blue" delay={0.3} />
+          <MetricCard title="Conversion Rate" value="12.4%" change="+0.8%" icon={TrendingUp} trend="up" color="blue" delay={0.4} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+          >
             <h3 className="text-lg font-bold text-fr-blue mb-6">User Evolution and Predictions</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -155,16 +187,24 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                  <Legend verticalAlign="top" align="right" />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    cursor={{ stroke: '#0055A4', strokeWidth: 2 }}
+                  />
+                  <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '20px' }} />
                   <Area type="monotone" dataKey="users" name="Real Users" fill="#0055A4" fillOpacity={0.1} stroke="#0055A4" strokeWidth={3} />
                   <Line type="monotone" dataKey="prediction" name="Growth Prediction" stroke="#3377B6" strokeDasharray="5 5" strokeWidth={2} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+          >
             <h3 className="text-lg font-bold text-fr-blue mb-6">Conversion Funnel</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -180,18 +220,23 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Section: Learning and Performance */}
+      {/* Section: Learning and AI Performance */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-fr-blue flex items-center gap-2">
-          <BookOpen className="w-5 h-5" /> Learning and Performance
+          <BrainCircuit className="w-5 h-5" /> Learning and AI Performance
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Heatmap simulated with Bar Chart */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2"
+          >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-fr-blue">Heatmap: Pronunciation Errors</h3>
               <Mic className="w-5 h-5 text-slate-400" />
@@ -221,32 +266,33 @@ export default function Dashboard() {
                 <div className="w-3 h-3 bg-fr-red rounded-full" /> High Error
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
-            <h3 className="text-lg font-bold text-fr-blue mb-4">Average Score</h3>
-            <div className="relative w-40 h-40 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle cx="80" cy="80" r="70" stroke="#f1f5f9" strokeWidth="12" fill="transparent" />
-                <circle 
-                  cx="80" cy="80" r="70" 
-                  stroke="#0055A4" strokeWidth="12" 
-                  fill="transparent" 
-                  strokeDasharray={440}
-                  strokeDashoffset={440 - (440 * 7.2) / 10}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-black text-fr-blue">7.2</span>
-                <span className="text-xs font-bold text-slate-400">LEVEL 10</span>
-              </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+          >
+            <h3 className="text-lg font-bold text-fr-blue mb-6">Model Metrics</h3>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={modelPerformance}>
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} hide />
+                  <Radar
+                    name="Model A"
+                    dataKey="A"
+                    stroke="#0055A4"
+                    fill="#0055A4"
+                    fillOpacity={0.4}
+                  />
+                  <Tooltip />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
-            <div className="mt-6 flex items-center gap-2 text-emerald-600 font-bold">
-              <Star className="w-4 h-4 fill-current" />
-              <span>+0.5 this month</span>
-            </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -256,7 +302,12 @@ export default function Dashboard() {
           <DollarSign className="w-5 h-5" /> Business and Finance
         </h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+            className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+          >
             <h3 className="text-lg font-bold text-fr-blue mb-6">Revenue vs Monthly Costs</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -271,10 +322,15 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </motion.div>
 
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.0 }}
+              className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm"
+            >
               <h3 className="text-sm font-bold text-slate-400 uppercase mb-2">Profitability Margin</h3>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-black text-fr-red">18.4%</span>
@@ -283,10 +339,15 @@ export default function Dashboard() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-2 italic">Target: 25% for Q4</p>
-            </div>
+            </motion.div>
 
             {/* Cultural Panel */}
-            <div className="bg-fr-blue p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.1 }}
+              className="bg-fr-blue p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group"
+            >
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Globe className="w-24 h-24" />
               </div>
@@ -302,7 +363,7 @@ export default function Dashboard() {
                   See more notes <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
