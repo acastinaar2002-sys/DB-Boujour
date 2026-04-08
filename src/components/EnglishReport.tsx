@@ -55,8 +55,8 @@ export default function EnglishReport() {
           </button>
         </div>
         <div className="mt-6 flex gap-4 text-sm text-slate-400 font-mono">
-          <span className="bg-slate-50 px-3 py-1 rounded-full">Date: 08/08/2026</span>
-          <span className="bg-slate-50 px-3 py-1 rounded-full">Group: DS-D-2-1</span>
+          <span className="bg-slate-50 px-3 py-1 rounded-full">Date: 2026</span>
+          <span className="bg-slate-50 px-3 py-1 rounded-full">Group: D-BD-2-1</span>
           <span className="bg-slate-50 px-3 py-1 rounded-full text-fr-blue font-bold">CONFIDENTIAL</span>
         </div>
       </div>
