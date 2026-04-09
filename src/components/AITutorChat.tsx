@@ -31,6 +31,7 @@ export default function AITutorChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'conversation' | 'coaching' | 'exam'>('conversation');
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
+  const [showWarning, setShowWarning] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,6 +53,24 @@ export default function AITutorChat() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+
+    // Demo Mode Fallback
+    if (apiKeyMissing) {
+      setTimeout(() => {
+        const demoResponses: Record<string, string> = {
+          "conversation": "C'est une excellente question ! En tant que tuteur IA en mode démo, je peux vous dire que le français est une langue magnifique. (Demo Mode: No API Key found)",
+          "coaching": "Je remarque que vous progressez bien. Continuez à pratiquer vos verbes ! (Demo Mode: No API Key found)",
+          "exam": "Pour l'examen, concentrez-vous sur la compréhension orale. Bonne chance ! (Demo Mode: No API Key found)"
+        };
+        
+        setMessages(prev => [...prev, { 
+          role: 'model', 
+          text: demoResponses[mode] || "Je suis en mode démo car aucune clé API n'a été trouvée." 
+        }]);
+        setIsLoading(false);
+      }, 1000);
+      return;
+    }
 
     try {
       const systemInstruction = `
@@ -148,14 +167,22 @@ export default function AITutorChat() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 relative"
       >
-        {apiKeyMissing && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-white/80 backdrop-blur-sm">
-            <div className="bg-red-50 border border-red-100 p-6 rounded-3xl text-center max-w-xs shadow-xl">
-              <AlertTriangle className="w-12 h-12 text-fr-red mx-auto mb-4" />
-              <h4 className="font-bold text-fr-red mb-2">API Key Missing</h4>
-              <p className="text-xs text-red-700 leading-relaxed">
-                The Gemini API Key is not configured. Please add <code className="bg-red-100 px-1 rounded">GEMINI_API_KEY</code> to your Vercel Environment Variables to enable the AI Tutor.
-              </p>
+        {apiKeyMissing && showWarning && (
+          <div className="sticky top-0 z-50 mb-4">
+            <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl shadow-lg flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-bold text-amber-800 text-xs">Demo Mode Active</h4>
+                <p className="text-[10px] text-amber-700 leading-relaxed">
+                  GEMINI_API_KEY is missing. The tutor is running in <b>Demo Mode</b> with simulated responses.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowWarning(false)}
+                className="p-1 hover:bg-amber-100 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-amber-500" />
+              </button>
             </div>
           </div>
         )}

@@ -73,12 +73,12 @@ const funnelData = [
 ];
 
 const financialData = [
-  { month: 'Jan', revenue: 45000, costs: 32000 },
-  { month: 'Feb', revenue: 52000, costs: 34000 },
-  { month: 'Mar', revenue: 48000, costs: 35000 },
-  { month: 'Apr', revenue: 61000, costs: 38000 },
-  { month: 'May', revenue: 67000, costs: 40000 },
-  { month: 'Jun', revenue: 75000, costs: 42000 },
+  { month: 'Jan', revenue: 45000, costs: 32000, profit: 13000 },
+  { month: 'Feb', revenue: 52000, costs: 34000, profit: 18000 },
+  { month: 'Mar', revenue: 58000, costs: 35000, profit: 23000 },
+  { month: 'Apr', revenue: 71000, costs: 38000, profit: 33000 },
+  { month: 'May', revenue: 87000, costs: 40000, profit: 47000 },
+  { month: 'Jun', revenue: 105000, costs: 42000, profit: 63000 },
 ];
 
 const pronunciationErrors = [
@@ -118,10 +118,10 @@ const culturalQuizzes = [
 ];
 
 const churnBreakdown = [
-  { reason: "Intermediate Plateau", impact: "45%", color: "bg-fr-red", description: "Users dropping off after Level 2" },
-  { reason: "Payment Failures", impact: "25%", color: "bg-amber-500", description: "Expired cards or failed renewals" },
-  { reason: "Course Difficulty", impact: "20%", color: "bg-fr-blue", description: "Advanced grammar complexity" },
-  { reason: "Other", impact: "10%", color: "bg-slate-400", description: "App inactivity or manual cancellations" },
+  { reason: "Subscription Renewals", impact: "68%", color: "bg-emerald-500", description: "High retention in Level 1 & 2" },
+  { reason: "Premium Upsells", impact: "18%", color: "bg-fr-blue", description: "Conversion to Annual Plans" },
+  { reason: "Referral Program", impact: "10%", color: "bg-amber-500", description: "Organic growth via student invites" },
+  { reason: "Other Growth", impact: "4%", color: "bg-slate-400", description: "Corporate partnerships and B2B" },
 ];
 
 const modelPerformance = [
@@ -202,16 +202,16 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Churn Alert */}
+          {/* Retention Success */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-4 bg-red-50 border border-red-100 p-4 rounded-2xl animate-pulse shadow-lg shadow-red-100/50"
+            className="flex items-center gap-4 bg-emerald-50 border border-emerald-100 p-4 rounded-2xl shadow-lg shadow-emerald-100/50"
           >
-            <AlertTriangle className="w-6 h-6 text-fr-red" />
+            <TrendingUp className="w-6 h-6 text-emerald-600" />
             <div>
-              <p className="text-fr-red font-bold text-sm">CHURN ALERT</p>
-              <p className="text-red-700 text-xs">Churn rate exceeded 15% in Intermediate level.</p>
+              <p className="text-emerald-600 font-bold text-sm">RETENTION UP</p>
+              <p className="text-emerald-700 text-xs">LTV increased by 12% this month.</p>
             </div>
           </motion.div>
         </div>
@@ -222,7 +222,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MetricCard title="DAU / MAU" value="24.5%" change="+2.1%" icon={Users} trend="up" color="blue" delay={0.1} />
-            <MetricCard title="Learning Flow" value="88% Velocity" change="+5.4%" icon={Zap} trend="up" color="blue" delay={0.2} />
+            <MetricCard title="Net Profit (Monthly)" value="€63,000" change="+34%" icon={DollarSign} trend="up" color="blue" delay={0.2} />
           </div>
           <AITutorChat />
         </div>
@@ -417,18 +417,21 @@ export default function Dashboard() {
             transition={{ delay: 0.9 }}
             className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"
           >
-            <h3 className="text-lg font-bold text-fr-blue mb-6">Revenue vs Monthly Costs</h3>
+            <h3 className="text-lg font-bold text-fr-blue mb-6">Financial Performance (Revenue, Costs & Profit)</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={financialData}>
+                <ComposedChart data={financialData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} />
                   <YAxis axisLine={false} tickLine={false} />
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  />
                   <Legend />
                   <Bar dataKey="revenue" name="Revenue" fill="#0055A4" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="costs" name="Costs" fill="#EF4135" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Line type="monotone" dataKey="profit" name="Net Profit" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </motion.div>
@@ -449,8 +452,8 @@ export default function Dashboard() {
                   
                   {/* Churn Breakdown Tooltip */}
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    <h4 className="text-xs font-black text-fr-blue uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <AlertTriangle className="w-3 h-3 text-fr-red" /> Churn Breakdown
+                    <h4 className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-3 h-3 text-emerald-600" /> Growth & Retention
                     </h4>
                     <div className="space-y-3">
                       {churnBreakdown.map((item, idx) => (
@@ -479,12 +482,12 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-end gap-2">
-                <span className="text-4xl font-black text-fr-red">18.4%</span>
-                <span className="text-fr-red font-bold text-sm mb-1 flex items-center">
-                  <ArrowDownRight className="w-4 h-4" /> Low
+                <span className="text-4xl font-black text-emerald-600">32.8%</span>
+                <span className="text-emerald-600 font-bold text-sm mb-1 flex items-center">
+                  <ArrowUpRight className="w-4 h-4" /> Healthy
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-2 italic">Target: 25% for Q4</p>
+              <p className="text-xs text-slate-500 mt-2 italic">Target: 25% (Exceeded)</p>
             </motion.div>
 
             {/* Cultural Panel */}
